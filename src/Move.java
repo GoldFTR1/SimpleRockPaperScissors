@@ -43,6 +43,7 @@ public class Move implements Serializable{
 		break;
 		case 3:
 		P1Move = MoveType.SCISSORS;
+		break;
 		default:
 			throw new InvalidGameTypeException();
 			}
@@ -61,5 +62,7 @@ public class Move implements Serializable{
 	public void setMoveType(MoveType moveType) {
 		this.moveType = moveType;
 	}
+	
+	
 
 }

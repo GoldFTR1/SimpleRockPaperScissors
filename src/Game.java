@@ -1,4 +1,5 @@
 import java.io.EOFException;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -9,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.Scanner;
 
-import Move.MoveType;
 
 public class Game implements Serializable {
 	int id;
@@ -41,7 +41,7 @@ public class Game implements Serializable {
 		Scanner a = new Scanner(System.in);
 		
 		try {
-		System.out.println("Enter 1 for P, enter 2 for PVC" );
+		System.out.println("Enter 1 for a Single Game, enter 2 for Best of Three" );
 		int scanned = a.nextInt();
 		
 		switch(scanned) {
@@ -80,19 +80,19 @@ public class Game implements Serializable {
 			break;
 		case PAPER:
 			if(P2.getMoveType().toString()=="ROCK")
-				result="P1 Wins";
+				result="P1 Wins!";
 				else if(P2.getMoveType().toString()=="PAPER")
-				result="tie";
+				result="tie!";
 				else if(P2.getMoveType().toString()=="SCISSORS")
-				result="P2 Wins";
+				result="P2 Wins!";
 			break;
 		case SCISSORS:
 			if(P2.getMoveType().toString()=="ROCK")
-				result="P2 Wins";
+				result="P2 Wins!";
 				else if(P2.getMoveType().toString()=="PAPER")
-				result="P1 Wins";
+				result="P1 Wins!";
 				else if(P2.getMoveType().toString()=="SCISSORS")
-				result="tie";
+				result="tie!";
 			break;
 		}
 		System.out.println(P1.getMoveType().toString());
@@ -121,9 +121,6 @@ public class Game implements Serializable {
 			}
 			
 			
-		}
-		else if(game.gameType == GameType.BO3) {
-			System.out.println("This also works");
 		}
 		return game;
 	}
@@ -178,8 +175,17 @@ public class Game implements Serializable {
 	}
 	
 	public static Game loadGames(String filename){
-		Game lastGame = null;
+		Game lastGame = new Game();
+		//lastGame.setId(0);
+		
+		
+		
 		try {
+			File file = new File(filename);
+			
+			if(file.exists() && file.length()>0) {
+				
+			
 			FileInputStream fileIn = new FileInputStream(filename);
 			ObjectInputStream ois = new ObjectInputStream(fileIn);
 			
@@ -196,10 +202,12 @@ public class Game implements Serializable {
 		                break; // Reached end of file
 		            }
 		        }
+			}
 			
 		}catch(IOException | ClassNotFoundException e) {
 			e.printStackTrace();
 		}
+		
 		return lastGame;
 		
 		
@@ -229,7 +237,7 @@ public class Game implements Serializable {
 	
 	public static int GenerateId(String filename) {
 		Game lastGame = loadGames(filename);
-		System.out.println(lastGame.getId());
+		//System.out.println(lastGame.getId());
 		int id= lastGame.id++;
 		if(lastGame.getId()==0) {
 			
@@ -245,10 +253,78 @@ public class Game implements Serializable {
 			ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("games.ser"));
 			oos.writeObject(Game);
 			System.out.println("Object written to file");
+			
 		}catch(IOException e) {
 			e.printStackTrace();
 			
 		}
+	}
+	
+	public static void PlaySingleGame(Game ThisGame) {
+
+		ThisGame.setId(Game.GenerateId("games.ser"));
+		
+		System.out.println(ThisGame.getGameType().toString());
+		
+		Game.SingleGame(ThisGame);
+		Game.WriteGameToFile("games.ser", ThisGame);
+	}
+	
+	public static void PlayBestOfThree(Game ThisGame) {
+		ThisGame.setId(Game.GenerateId("games.ser"));
+	}
+	
+	public static Game BestOfThree(Game game) {
+			int P1Wins=0;
+			int P2Wins=0;
+			
+			game.setCounter(0);
+			
+			while(P1Wins <2 && P2Wins < 2) {
+			game.setMove(game.P1Move,Move.P1ChooseMove(),game.counter);
+			game.setMove(game.P2Move,Move.PVCChooseMove(),game.counter);
+			game.setResult(TheGame(game.P1Move.get(game.counter),game.P2Move.get(game.counter)));
+			 game.setCounter(game.getCounter() + 1);
+			if(game.result=="P1 Wins!") {
+				P1Wins++;
+				
+			}
+			else if(game.result=="P2 Wins!") {
+				P2Wins++;
+			
+			}
+			
+			while(game.result=="tie!") {
+				
+				
+				game.setMove(game.P1Move,Move.P1ChooseMove(),game.counter);
+				game.setMove(game.P2Move,Move.PVCChooseMove(),game.counter);
+				game.setResult(TheGame(game.P1Move.get(game.counter),game.P2Move.get(game.counter)));
+				game.setCounter(game.getCounter() + 1);
+				if(game.result=="P1 Wins!") {
+					P1Wins++;
+					
+				}
+				else if(game.result=="P2 Wins!") {
+					P2Wins++;
+					
+				}
+					}
+			
+			
+			}
+		if(P1Wins==2) {
+			game.setResult("P1 Wins!");
+			
+		}
+		else if(P2Wins==2) {
+			game.setResult("P2 Wins!");
+		}
+			
+		System.out.println(game.getResult());
+		
+		return game;
+		
 	}
 
 }

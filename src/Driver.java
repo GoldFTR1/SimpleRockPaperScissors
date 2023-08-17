@@ -7,17 +7,22 @@ import java.util.ArrayList;
 
 public class Driver {
 	public static void main(String args[]) {
+	//DisplayGames.DisplayGameHistory();
 	Game ThisGame = new Game();
+	
 	ThisGame.setGameType(Game.Begin());
 	
-	ThisGame.setId(Game.GenerateId("games.ser"));
+	if(ThisGame.getGameType() == Game.GameType.SINGLEGAME) {
 	
-	System.out.println(ThisGame.getGameType().toString());
-	ThisGame.counter=1;
-	Game.SingleGame(ThisGame);
+	Game.PlaySingleGame(ThisGame);
 	
-	System.out.println("Counter is " + ThisGame.counter);
-	Game.WriteGameToFile("games.ser", ThisGame);
+	}else {
+		ThisGame.setId(Game.GenerateId("games.ser"));
+		Game.BestOfThree(ThisGame);
+		System.out.println("Game id is" + ThisGame.getId());
+		Game.WriteGameToFile("games.ser", ThisGame);
+	}
+	
 	
 	
 	}
